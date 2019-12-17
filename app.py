@@ -6,6 +6,7 @@ from flask_restplus import Resource, Api
 import os
 
 #apiKey = os.environ['apiKey']
+unisexNameChoices = ['Male', 'Female']
 
 app = Flask(__name__)
 api = Api(app,
@@ -35,7 +36,7 @@ for root, directories, filenames in os.walk(basePath):
                     data = yaml.load(file, Loader=yaml.FullLoader)
                     if isinstance(data, list):
                         for record in data:
-                            ldata = {"lastName": record}
+                            ldata = {"lastName": record.title()}
                             lastNameList.append(ldata)
 
             elif pathAndFileName.__contains__('given_name'):
@@ -45,12 +46,22 @@ for root, directories, filenames in os.walk(basePath):
                         for record in data:
                             firstName = list(record.keys())[0]
                             gender = record[firstName]['gender']
-                            fdata = {"firstName": firstName, "gender": gender}
+                            if gender == 'unisex':
+                                gender = random.choice(unisexNameChoices)
+                            fdata = {
+                                "firstName": firstName.title(),
+                                "gender": gender.title()
+                            }
                             firstNameList.append(fdata)
                     elif isinstance(data, dict):
                         firstName = list(data.keys())[0]
                         gender = data[firstName]['gender']
-                        fdata = {"firstName": firstName, "gender": gender}
+                        if name['gender'] == 'unisex':
+                            name['gender'] = random.choice(unisexNameChoices)
+                        fdata = {
+                            "firstName": firstName.title(),
+                            "gender": gender.title()
+                        }
                         firstNameList.append(fdata)
 
 
@@ -58,10 +69,8 @@ for root, directories, filenames in os.walk(basePath):
 class GenerateName(Resource):
     def get(self):
         name = random.choice(firstNameList)
-        name['lastName'] = random.choice(lastNameList)['lastName'].title()
-        if name['gender'] == 'unisex':
-            name['gender'] = 'unknown'
-        name['firstName'] = name['firstName'].title()
+        name['lastName'] = random.choice(lastNameList)['lastName']
+        name['firstName'] = name['firstName']
         name['fullName'] = name['firstName'] + ' ' + name['lastName']
         return name
 
