@@ -14,8 +14,9 @@ api = Api(app,
           description='Uses Census Data from US to generate random names',
           prefix="/v1",
           contact="api.support@swarmee.net",
-          contact_url="www.swarmee.net",
-          doc='/doc')
+          contact_url="www.swarmee.net"
+          #          ,          doc='/doc'
+          )
 app.config.SWAGGER_UI_DOC_EXPANSION = 'full'
 app.config.SWAGGER_UI_OPERATION_ID = True
 app.config.SWAGGER_UI_REQUEST_DURATION = True
@@ -66,4 +67,4 @@ class GenerateName(Resource):
 
 
 if __name__ == '__main__':
-    app.run(debug=False, threaded=True)
+    app.run(debug=False, threaded=True, host='0.0.0.0')
