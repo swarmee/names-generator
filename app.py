@@ -1,13 +1,16 @@
-##  requirements pyyml
+##  imports
 import yaml
 import random
-from flask import Flask
+from flask import Flask, request
 from flask_restplus import Resource, Api
 import os
+from functools import wraps
 
-#apiKey = os.environ['apiKey']
+## environment variables
+firstNameList = []
+lastNameList = []
+basePath = './'
 unisexNameChoices = ['Male', 'Female']
-
 authorizations = {
     'apikey': {
         'type': 'apiKey',
@@ -15,6 +18,10 @@ authorizations = {
         'name': 'X-API-KEY'
     }
 }
+try:
+    apiKey = os.environ['apiKey']
+except:
+    apiKey = 'default'
 
 app = Flask(__name__)
 api = Api(app,
@@ -31,11 +38,24 @@ api = Api(app,
 app.config.SWAGGER_UI_DOC_EXPANSION = 'full'
 app.config.SWAGGER_UI_OPERATION_ID = True
 app.config.SWAGGER_UI_REQUEST_DURATION = True
+app.config.SWAGGER_UI_JSONEDITOR = True
 
-firstNameList = []
-lastNameList = []
 
-basePath = './'
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'X-API-KEY' in request.headers:
+            token = request.headers['X-API-KEY']
+        if not token:
+            return {'message': 'Token is missing.'}, 401
+        if token != apiKey:
+            return {'message': 'Your token is wrong!'}, 401
+        #print('TOKEN: {}'.format(token))
+        return f(*args, **kwargs)
+
+    return decorated
+
 
 for root, directories, filenames in os.walk(basePath):
     for filename in filenames:
@@ -77,6 +97,7 @@ for root, directories, filenames in os.walk(basePath):
 
 @api.route('/name')
 class GenerateName(Resource):
+    @token_required
     def get(self):
         name = random.choice(firstNameList)
         name['lastName'] = random.choice(lastNameList)['lastName']
@@ -84,8 +105,6 @@ class GenerateName(Resource):
         name['fullName'] = name['firstName'] + ' ' + name['lastName']
         return name
 
-
-## print('nothing')
 
 if __name__ == '__main__':
     app.run(debug=False, threaded=True, host='0.0.0.0')
