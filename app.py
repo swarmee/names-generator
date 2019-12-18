@@ -8,8 +8,18 @@ import os
 #apiKey = os.environ['apiKey']
 unisexNameChoices = ['Male', 'Female']
 
+authorizations = {
+    'apikey': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'X-API-KEY'
+    }
+}
+
 app = Flask(__name__)
 api = Api(app,
+          authorizations=authorizations,
+          security='apikey',
           version='1.0',
           title='Name Generator API',
           description='Uses Census Data from US to generate random names',
