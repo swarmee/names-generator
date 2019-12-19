@@ -13,15 +13,16 @@ basePath = './'
 unisexNameChoices = ['Male', 'Female']
 authorizations = {
     'apikey': {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'X-API-KEY'
+        'type': 'apikey',
+        'in': 'query',
+        #        'in': 'header',
+        'name': 'apikey'
     }
 }
 try:
-    apiKey = os.environ['apiKey']
+    apikey = os.environ['apikey']
 except:
-    apiKey = 'default'
+    apikey = 'default'
 
 app = Flask(__name__)
 api = Api(app,
@@ -39,23 +40,6 @@ app.config.SWAGGER_UI_DOC_EXPANSION = 'full'
 app.config.SWAGGER_UI_OPERATION_ID = True
 app.config.SWAGGER_UI_REQUEST_DURATION = True
 app.config.SWAGGER_UI_JSONEDITOR = True
-
-
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        if 'X-API-KEY' in request.headers:
-            token = request.headers['X-API-KEY']
-        if not token:
-            return {'message': 'Token is missing.'}, 401
-        if token != apiKey:
-            return {'message': 'Your token is wrong!'}, 401
-        #print('TOKEN: {}'.format(token))
-        return f(*args, **kwargs)
-
-    return decorated
-
 
 for root, directories, filenames in os.walk(basePath):
     for filename in filenames:
@@ -94,17 +78,34 @@ for root, directories, filenames in os.walk(basePath):
                         }
                         firstNameList.append(fdata)
 
+pns = api.namespace('name', description='Name Namespace')
 
-@api.route('/name')
+
+def Generate_Name():
+    name = random.choice(firstNameList)
+    name['lastName'] = random.choice(lastNameList)['lastName']
+    name['firstName'] = name['firstName']
+    name['fullName'] = name['firstName'] + ' ' + name['lastName']
+    return name
+
+
+@pns.route('/getrandom')
 class GenerateName(Resource):
-    @token_required
     def get(self):
-        name = random.choice(firstNameList)
-        name['lastName'] = random.choice(lastNameList)['lastName']
-        name['firstName'] = name['firstName']
-        name['fullName'] = name['firstName'] + ' ' + name['lastName']
-        return name
+        requestDetails = request.args.to_dict()
+        suppliedapikey = None
+        print(requestDetails)
+        if requestDetails.get('apikey', None) != None:
+            if isinstance(requestDetails['apikey'], str):
+                suppliedapikey = requestDetails['apikey']
+        print(suppliedapikey)
+        print(apikey)
+        if suppliedapikey == apikey:
+            response = Generate_Name()
+            return response, 200
+        else:
+            return {"error": "apikey error"}, 401
 
 
 if __name__ == '__main__':
-    app.run(debug=False, threaded=True, host='0.0.0.0')
+    app.run(debug=True, threaded=True, host='0.0.0.0')
