@@ -5,7 +5,8 @@ from flask import Flask, request
 import requests
 from flask_restplus import Resource, Api
 import os
-from functools import wraps
+from     datetime   import date, datetime
+from     faker      import Faker
 
 ## environment variables
 firstNameList = []
@@ -24,6 +25,8 @@ try:
     apikey = os.environ['apikey']
 except:
     apikey = 'default'
+
+fake                                 = Faker('en_AU')
 
 app = Flask(__name__)
 api = Api(app,
@@ -81,7 +84,7 @@ for root, directories, filenames in os.walk(basePath):
 
 bsbs = requests.get('https://api.swarmee.net/v1/dataset/bsbs/?batchSize=10000',
                     auth=('example', 'form'))
-bsbs = res.json()
+bsbs = bsbs.json()
 bsbs = bsbs['bsbs']['content']
 
 pns = api.namespace('name', description='Name Namespace')
@@ -113,60 +116,38 @@ class GenerateName(Resource):
             return {"error": "apikey error"}, 401
 
 
-@pns.route('/getaddress')
-class GenerateName(Resource):
-    def get(self):
+
+def Generate_Account():
         account = random.choice(bsbs)
-        return account
-
-
-def getDomesticBankAccounts(domesticEntity):
-    domesticEntity = {'party': {'account': []}}
-    for x in range(0, 1):
         bankAccount = {}
-        accountQuery = {
-            "query": {
-                "function_score": {
-                    "functions": [{
-                        "random_score": {}
-                    }]
-                }
-            },
-            "size": 1
-        }
-        #if len(domesticEntity['bankAccounts']) > 0:
-        #  accountQuery                       = {"query":{"function_score":{"query":{"nested":{"path":"activity.role.party.address","query":{"match":{"activity.role.party.address.suburb":domesticEntity['bankAccounts'][0]['suburb']}}}},"functions":[{"random_score":{}}]}},"size":1}
-        accountDetails = es.search(index='bsbs', body=accountQuery)
-        bankAccount['institutionName'] = accountDetails['hits']['hits'][0][
-            '_source']['bsbDetails']['institutionName'].title()
-        bankAccount['institutionCode'] = accountDetails['hits']['hits'][0][
-            '_source']['bsbDetails']['financialInstitutionCode']
-        bankAccount['bankStateBranchCode'] = accountDetails['hits']['hits'][0][
-            '_source']['bsbDetails']['bankStateBranchCode']
-        bankAccount['branchName'] = accountDetails['hits']['hits'][0][
-            '_source']['activity'][0]['role'][0]['party'][0]['name'][0][
+        bankAccount['institutionName'] = account['bsb']['content']['bsbDetails']['institutionName'].title()
+        bankAccount['institutionCode'] = account['bsb']['content']['bsbDetails']['financialInstitutionCode']
+        bankAccount['bankStateBranchCode'] = account['bsb']['content']['bsbDetails']['bankStateBranchCode']
+        bankAccount['branchName'] = account['bsb']['content']['activity'][0]['role'][0]['party'][0]['name'][0][
                 'fullName']
-        bankAccount['streetAddress'] = accountDetails['hits']['hits'][0][
-            '_source']['activity'][0]['role'][0]['party'][0]['address'][0][
+        bankAccount['streetAddress'] = account['bsb']['content']]['activity'][0]['role'][0]['party'][0]['address'][0][
                 'streetAddress'].title()
         try:
-            bankAccount['postcode'] = accountDetails['hits']['hits'][0][
-                '_source']['activity'][0]['role'][0]['party'][0]['address'][0][
+            bankAccount['postcode'] = account['bsb']['content']['activity'][0]['role'][0]['party'][0]['address'][0][
                     'postcode']
         except:
             bankAccount['postcode'] = '2000'
         try:
-            bankAccount['suburb'] = accountDetails['hits']['hits'][0][
-                '_source']['activity'][0]['role'][0]['party'][0]['address'][0][
+            bankAccount['suburb'] = account['bsb']['content']['activity'][0]['role'][0]['party'][0]['address'][0][
                     'suburb'].title()
         except:
             bankAccount['suburb'] = 'Sydney'
-        bankAccount['state'] = accountDetails['hits']['hits'][0]['_source'][
+        bankAccount['state'] = account['bsb']['content'][
             'activity'][0]['role'][0]['party'][0]['address'][0]['state']
         bankAccount['accountNumber'] = fake.numerify(text="##-###-####")
-        domesticEntity['party']['account'].append(bankAccount)
-    return domesticEntity
+        return bankAccount
 
+
+@pns.route('/randomaccount')
+class GenerateName(Resource):
+    def get(self):
+        account = Generate_Account()
+        return account
 
 if __name__ == '__main__':
     app.run(debug=True, threaded=True, host='0.0.0.0')
