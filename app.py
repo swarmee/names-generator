@@ -13,7 +13,7 @@ basePath = './'
 unisexNameChoices = ['Male', 'Female']
 authorizations = {
     'apikey': {
-        'type': 'apikey',
+        'type': 'apiKey',
         'in': 'query',
         #        'in': 'header',
         'name': 'apikey'
