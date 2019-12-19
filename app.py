@@ -116,6 +116,7 @@ class GenerateName(Resource):
             return {"error": "apikey error"}, 401
 
 
+## comment
 def Generate_Account():
     account = random.choice(bsbs)
     bankAccount = {}
