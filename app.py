@@ -88,6 +88,7 @@ bsbs = bsbs.json()
 bsbs = bsbs['bsbs']['content']
 
 pns = api.namespace('name', description='Name Namespace')
+ans = api.namespace('address', description='Address Namespace')
 
 
 def Generate_Name():
@@ -98,18 +99,20 @@ def Generate_Name():
     return name
 
 
+def Auth_ApiKey(queryParams):
+    suppliedapikey = None
+    if queryParams.get('apikey', None) != None:
+        if isinstance(queryParams['apikey'], str):
+            suppliedapikey = queryParams['apikey']
+            if suppliedapikey == apikey:
+                return True
+    return False
+
+
 @pns.route('/random')
 class GenerateName(Resource):
     def get(self):
-        requestDetails = request.args.to_dict()
-        suppliedapikey = None
-        print(requestDetails)
-        if requestDetails.get('apikey', None) != None:
-            if isinstance(requestDetails['apikey'], str):
-                suppliedapikey = requestDetails['apikey']
-        print(suppliedapikey)
-        print(apikey)
-        if suppliedapikey == apikey:
+        if Auth_ApiKey(request.args.to_dict()):
             response = Generate_Name()
             return response, 200
         else:
@@ -146,11 +149,14 @@ def Generate_Account():
     return bankAccount
 
 
-@pns.route('/randomaccount')
+@ans.route('/random')
 class GenerateName(Resource):
     def get(self):
-        account = Generate_Account()
-        return account
+        if Auth_ApiKey(request.args.to_dict()):
+            account = Generate_Account()
+            return account
+        else:
+            return {"error": "apikey error"}, 401
 
 
 if __name__ == '__main__':
