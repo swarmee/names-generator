@@ -2,6 +2,7 @@
 import yaml
 import random
 from flask import Flask, request
+import requests
 from flask_restplus import Resource, Api
 import os
 from functools import wraps
@@ -89,7 +90,7 @@ def Generate_Name():
     return name
 
 
-@pns.route('/getrandom')
+@pns.route('/random')
 class GenerateName(Resource):
     def get(self):
         requestDetails = request.args.to_dict()
@@ -105,6 +106,16 @@ class GenerateName(Resource):
             return response, 200
         else:
             return {"error": "apikey error"}, 401
+
+
+@pns.route('/getaddress')
+class GenerateName(Resource):
+    def get(self):
+        res = requests.get(
+            'https://api.swarmee.net/v1/dataset/bsbs/?batchSize=10',
+            auth=('example', 'form'))
+        res = res.json()
+        return res
 
 
 if __name__ == '__main__':
