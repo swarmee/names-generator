@@ -7,3 +7,4 @@ gunicorn==19.9.0
 #MarkupSafe==1.1.1
 PyYAML==5.2
 #Werkzeug==0.15.6
+requests==2.22.0
