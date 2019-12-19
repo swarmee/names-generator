@@ -5,8 +5,8 @@ from flask import Flask, request
 import requests
 from flask_restplus import Resource, Api
 import os
-from     datetime   import date, datetime
-from     faker      import Faker
+from datetime import date, datetime
+from faker import Faker
 
 ## environment variables
 firstNameList = []
@@ -26,7 +26,7 @@ try:
 except:
     apikey = 'default'
 
-fake                                 = Faker('en_AU')
+fake = Faker('en_AU')
 
 app = Flask(__name__)
 api = Api(app,
@@ -116,31 +116,33 @@ class GenerateName(Resource):
             return {"error": "apikey error"}, 401
 
 
-
 def Generate_Account():
-        account = random.choice(bsbs)
-        bankAccount = {}
-        bankAccount['institutionName'] = account['bsb']['content']['bsbDetails']['institutionName'].title()
-        bankAccount['institutionCode'] = account['bsb']['content']['bsbDetails']['financialInstitutionCode']
-        bankAccount['bankStateBranchCode'] = account['bsb']['content']['bsbDetails']['bankStateBranchCode']
-        bankAccount['branchName'] = account['bsb']['content']['activity'][0]['role'][0]['party'][0]['name'][0][
-                'fullName']
-        bankAccount['streetAddress'] = account['bsb']['content']]['activity'][0]['role'][0]['party'][0]['address'][0][
-                'streetAddress'].title()
-        try:
-            bankAccount['postcode'] = account['bsb']['content']['activity'][0]['role'][0]['party'][0]['address'][0][
-                    'postcode']
-        except:
-            bankAccount['postcode'] = '2000'
-        try:
-            bankAccount['suburb'] = account['bsb']['content']['activity'][0]['role'][0]['party'][0]['address'][0][
-                    'suburb'].title()
-        except:
-            bankAccount['suburb'] = 'Sydney'
-        bankAccount['state'] = account['bsb']['content'][
-            'activity'][0]['role'][0]['party'][0]['address'][0]['state']
-        bankAccount['accountNumber'] = fake.numerify(text="##-###-####")
-        return bankAccount
+    account = random.choice(bsbs)
+    bankAccount = {}
+    bankAccount['institutionName'] = account['bsb']['content']['bsbDetails'][
+        'institutionName'].title()
+    bankAccount['institutionCode'] = account['bsb']['content']['bsbDetails'][
+        'financialInstitutionCode']
+    bankAccount['bankStateBranchCode'] = account['bsb']['content'][
+        'bsbDetails']['bankStateBranchCode']
+    bankAccount['branchName'] = account['bsb']['content']['activity'][0][
+        'role'][0]['party'][0]['name'][0]['fullName']
+    bankAccount['streetAddress'] = account['bsb']['content']['activity'][0][
+        'role'][0]['party'][0]['address'][0]['streetAddress'].title()
+    try:
+        bankAccount['postcode'] = account['bsb']['content']['activity'][0][
+            'role'][0]['party'][0]['address'][0]['postcode']
+    except:
+        bankAccount['postcode'] = '2000'
+    try:
+        bankAccount['suburb'] = account['bsb']['content']['activity'][0][
+            'role'][0]['party'][0]['address'][0]['suburb'].title()
+    except:
+        bankAccount['suburb'] = 'Sydney'
+    bankAccount['state'] = account['bsb']['content']['activity'][0]['role'][0][
+        'party'][0]['address'][0]['state']
+    bankAccount['accountNumber'] = fake.numerify(text="##-###-####")
+    return bankAccount
 
 
 @pns.route('/randomaccount')
@@ -148,6 +150,7 @@ class GenerateName(Resource):
     def get(self):
         account = Generate_Account()
         return account
+
 
 if __name__ == '__main__':
     app.run(debug=True, threaded=True, host='0.0.0.0')
