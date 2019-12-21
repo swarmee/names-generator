@@ -21,9 +21,5 @@ api = Api(authorizations=authorizations,
           contact="api.support@swarmee.net",
           contact_url="www.swarmee.net")
 
-app.config.SWAGGER_UI_DOC_EXPANSION = 'full'
-app.config.SWAGGER_UI_OPERATION_ID = True
-app.config.SWAGGER_UI_REQUEST_DURATION = True
-
 api.add_namespace(name, path='/name')
 api.add_namespace(account, path='/account')
