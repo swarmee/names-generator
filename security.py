@@ -6,8 +6,6 @@ try:
 except:
     apiKey = 'default'
 
-print(apiKey)
-
 
 def token_required(f):
     @wraps(f)
@@ -22,6 +20,3 @@ def token_required(f):
         return f(*args, **kwargs)
 
     return decorated
-
-
-abc = 123

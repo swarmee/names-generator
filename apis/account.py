@@ -1,7 +1,6 @@
 import json
 import random
 from flask import Flask, request
-import requests
 from flask_restplus import Resource, Api, Namespace
 import os
 from datetime import date, datetime
