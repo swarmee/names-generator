@@ -1,15 +1,15 @@
 from functools import wraps
 from flask import request
-
-try:
-    apiKey = os.environ['apiKey']
-except:
-    apiKey = 'default'
+import os
 
 
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        try:
+            apiKey = os.environ['apiKey']
+        except:
+            apiKey = 'default'
         token = None
         if 'X-API-KEY' in request.headers:
             token = request.headers['X-API-KEY']

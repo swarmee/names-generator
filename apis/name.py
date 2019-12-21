@@ -8,7 +8,6 @@ import json
 from functools import wraps
 import security
 
-print('nothing')
 ## load name data into memory
 with open('./resources/firstNameList.json') as json_file:
     firstNameList = json.load(json_file)
