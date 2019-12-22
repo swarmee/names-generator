@@ -14,7 +14,7 @@ with open('./resources/firstNameList.json') as json_file:
 with open('./resources/lastNameList.json') as json_file:
     lastNameList = json.load(json_file)
 
-api = Namespace('name', description='Name Namespace')
+api = Namespace('name', description='Name Namespace', ordered=True)
 
 
 def Generate_Name():
